@@ -18,10 +18,13 @@ jobs:
              
       - name: Install Unity
         run: |
+          echo "Downloading Hub Installer"
           curl --output installer.exe "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe"
-          Start-Process "installer.exe" -ArgumentList "/S" -Wait
-          Start-Process "C:/Program Files/Unity Hub/Unity Hub.exe" -ArgumentList "-- --headless install --version $env:UNITY_VERSION --changeset $env:UNITY_CHANGESET" -Wait
-          Start-Process "C:/Program Files/Unity Hub/Unity Hub.exe" -ArgumentList "-- --headless install-modules --version $env:UNITY_VERSION --module $env:MODULE --childModules" -Wait
+          & "installer.exe" /S | Out-Default
+          echo "Installing Editor"
+          & "C:/Program Files/Unity Hub/Unity Hub.exe" -- --headless install --version $env:UNITY_VERSION --changeset $env:UNITY_CHANGESET | Out-Default
+          echo "Installing Modules"
+          & "C:/Program Files/Unity Hub/Unity Hub.exe" -- --headless install-modules --version $env:UNITY_VERSION --module $env:MODULE --childModules | Out-Default
         env:
           UNITY_VERSION: ${{ steps.get_version.outputs.VERSION }}
           UNITY_CHANGESET: ${{ steps.get_version.outputs.CHANGESET }}
@@ -29,7 +32,7 @@ jobs:
       
       - name: Build Project
         run: |
-          Start-Process "C:\Program Files\Unity\Hub\Editor\$env:UNITY_VERSION\Editor\Unity.exe" -ArgumentList "-executeMethod $env:BUILD_METHOD -logFile $env:LOG_FILE" -Wait
+          & "C:\Program Files\Unity\Hub\Editor\$env:UNITY_VERSION\Editor\Unity.exe" -executeMethod $env:BUILD_METHOD -logFile $env:LOG_FILE | Out-Default
         env: 
           UNITY_VERSION: ${{ steps.get_version.outputs.VERSION }}
           BUILD_METHOD: Builder.BuildAndroidPlayer
