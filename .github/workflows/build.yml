@@ -30,10 +30,26 @@ jobs:
           UNITY_VERSION: ${{ steps.get_version.outputs.VERSION }}
           UNITY_CHANGESET: ${{ steps.get_version.outputs.CHANGESET }}
           MODULE: android
+          
+      - name: Activate Unity License
+        run: |
+          & "$env:UNITY_PATH" -username $env:UNITY_EMAIL -serial $env:UNITY_SERIAL -password $env:UNITY_PASSWORD -logFile - -nographics -batchmode -quit | Out-Default
+        env: 
+          UNITY_PATH: C:\Program Files\Unity\Hub\Editor\${{ steps.get_version.outputs.VERSION }}\Editor\Unity.exe
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
       
       - name: Build Project
-        run: |
-          & "C:\Program Files\Unity\Hub\Editor\$env:UNITY_VERSION\Editor\Unity.exe" -executeMethod $env:BUILD_METHOD -batchmode -quit -logFile - | Out-Default
+        run:  |
+          & "$env:UNITY_PATH" -username $env:UNITY_EMAIL -serial ${{ secrets.UNITY_SERIAL }} -password ${{ secrets.UNITY_PASSWORD }} -executeMethod $env:BUILD_METHOD -batchmode -quit -logFile - | Out-Default
         env: 
-          UNITY_VERSION: ${{ steps.get_version.outputs.VERSION }}
+          UNITY_PATH: C:\Program Files\Unity\Hub\Editor\${{ steps.get_version.outputs.VERSION }}\Editor\Unity.exe
           BUILD_METHOD: Builder.BuildAndroidPlayer
+      
+      - name: Return Unity License
+        if: always() 
+        run: |
+          & "$env:UNITY_PATH" -returnlicense -logFile - -verbose -nographics -batchmode -quit | Out-Default
+        env: 
+          UNITY_PATH: C:\Program Files\Unity\Hub\Editor\${{ steps.get_version.outputs.VERSION }}\Editor\Unity.exe
