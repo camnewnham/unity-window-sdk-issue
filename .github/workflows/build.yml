@@ -10,11 +10,9 @@ jobs:
       - name: Get Unity Version
         id: get_version
         run: |
-          $projectVersion = (Get-Content -Path ProjectSettings\ProjectVersion.txt | Out-String)
-          $unityVersion = [regex]::match($projectVersion, '(?<=m_EditorVersion:\s).+').Value.Trim()
-          $editorChangeset = [regex]::match($projectVersion, '(?<=\()[^\)]+').Value.Trim()
-          echo "VERSION=$unityVersion" >> $env:GITHUB_OUTPUT
-          echo "CHANGESET=$editorChangeset" >> $env:GITHUB_OUTPUT
+          $match = [regex]::match((Get-Content -Path ProjectSettings\ProjectVersion.txt | Out-String), 'm_EditorVersionWithRevision: (?<version>[^\s]+) \((?<changeset>[^\)]+)\)')
+          echo "VERSION=$($match.groups["version"].Value)" >> $env:GITHUB_OUTPUT
+          echo "CHANGESET=$($match.groups["changeset"].Value)" >> $env:GITHUB_OUTPUT
              
       - name: Install Unity
         run: |
@@ -42,7 +40,7 @@ jobs:
       
       - name: Build Project
         run:  |
-          & "$env:UNITY_PATH" -username $env:UNITY_EMAIL -serial ${{ secrets.UNITY_SERIAL }} -password ${{ secrets.UNITY_PASSWORD }} -executeMethod $env:BUILD_METHOD -batchmode -quit -logFile - | Out-Default
+          & "$env:UNITY_PATH" -executeMethod $env:BUILD_METHOD -batchmode -quit -logFile - | Out-Default
         env: 
           UNITY_PATH: C:\Program Files\Unity\Hub\Editor\${{ steps.get_version.outputs.VERSION }}\Editor\Unity.exe
           BUILD_METHOD: Builder.BuildAndroidPlayer
