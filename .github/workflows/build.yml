@@ -36,7 +36,7 @@ jobs:
           LOG_FILE: logs\build.txt
       
       - name: Upload build log
-      - uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3
         with:
           name: build-log
           path: logs\build.txt
