@@ -1,0 +1,43 @@
+name: Build Windows
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Get Unity Version
+        id: get_version
+        run: |
+          $projectVersion = (Get-Content -Path ProjectSettings\ProjectVersion.txt | Out-String)
+          $unityVersion = [regex]::match($projectVersion, '(?<=m_EditorVersion:\s).+').Value
+          $editorChangeset = [regex]::match($projectVersion, '(?<=\()[^\)]+').Value
+          echo "VERSION=$unityVersion" >> $env:GITHUB_OUTPUT
+          echo "CHANGESET=$editorChangeset" >> $env:GITHUB_OUTPUT
+             
+      - name: Install Unity
+        run: |
+          curl --output installer.exe "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe"
+          Start-Process "installer.exe" -ArgumentList "/S" -Wait
+          Start-Process "C:/Program Files/Unity Hub/Unity Hub.exe" -ArgumentList "-- --headless install --version $env:UNITY_VERSION --changeset $env:UNITY_CHANGESET" -Wait
+          Start-Process "C:/Program Files/Unity Hub/Unity Hub.exe" -ArgumentList "-- --headless install-modules --version $env:UNITY_VERSION --module $env:MODULE --childModules" -Wait
+        env:
+          UNITY_VERSION: ${{ steps.get_version.outputs.VERSION }}
+          UNITY_CHANGESET: ${{ steps.get_version.outputs.CHANGESET }}
+          MODULE: android
+      
+      - name: Build Project
+        run: |
+          Start-Process "C:\Program Files\Unity\Hub\Editor\$env:UNITY_VERSION\Editor\Unity.exe" -ArgumentList "-executeMethod $env:BUILD_METHOD -logFile $env:LOG_FILE" -Wait
+        env: 
+          UNITY_VERSION: ${{ steps.get_version.outputs.VERSION }}
+          BUILD_METHOD: Builder.BuildAndroidPlayer
+          LOG_FILE: logs\build.txt
+      
+      - name: Upload build log
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build-log
+          path: logs\build.txt
+        
