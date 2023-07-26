@@ -11,8 +11,8 @@ jobs:
         id: get_version
         run: |
           $projectVersion = (Get-Content -Path ProjectSettings\ProjectVersion.txt | Out-String)
-          $unityVersion = [regex]::match($projectVersion, '(?<=m_EditorVersion:\s).+').Value
-          $editorChangeset = [regex]::match($projectVersion, '(?<=\()[^\)]+').Value
+          $unityVersion = [regex]::match($projectVersion, '(?<=m_EditorVersion:\s).+').Value.Trim()
+          $editorChangeset = [regex]::match($projectVersion, '(?<=\()[^\)]+').Value.Trim()
           echo "VERSION=$unityVersion" >> $env:GITHUB_OUTPUT
           echo "CHANGESET=$editorChangeset" >> $env:GITHUB_OUTPUT
              
