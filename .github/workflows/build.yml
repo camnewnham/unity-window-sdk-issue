@@ -33,15 +33,7 @@ jobs:
       
       - name: Build Project
         run: |
-          & "C:\Program Files\Unity\Hub\Editor\$env:UNITY_VERSION\Editor\Unity.exe" -executeMethod $env:BUILD_METHOD -logFile $env:LOG_FILE | Out-Default
+          & "C:\Program Files\Unity\Hub\Editor\$env:UNITY_VERSION\Editor\Unity.exe" -executeMethod $env:BUILD_METHOD -batchmode -quit -logFile - | Out-Default
         env: 
           UNITY_VERSION: ${{ steps.get_version.outputs.VERSION }}
           BUILD_METHOD: Builder.BuildAndroidPlayer
-          LOG_FILE: logs\build.txt
-      
-      - name: Upload build log
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-log
-          path: logs\build.txt
-        
