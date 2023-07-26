@@ -1,4 +1,4 @@
-name: Build Windows
+name: Install and Build
 on:
   workflow_dispatch:
 jobs:
