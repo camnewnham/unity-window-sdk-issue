@@ -20,7 +20,7 @@ jobs:
         run: |
           echo "Downloading Hub Installer"
           curl --output installer.exe "https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.exe"
-          & "installer.exe" /S | Out-Default
+          & ".\installer.exe" /S | Out-Default
           echo "Installing Editor"
           & "C:/Program Files/Unity Hub/Unity Hub.exe" -- --headless install --version $env:UNITY_VERSION --changeset $env:UNITY_CHANGESET | Out-Default
           echo "Installing Modules"
